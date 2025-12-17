@@ -1,0 +1,481 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC Typing Test Pro - Official Exam Practice Portal</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Prepare for SSC CGL, CHSL, and MTS typing tests with official standard passages. Features accurate Net WPM, Gross Words, and Keystroke calculation.">
+    <meta name="keywords" content="SSC Typing Test, CGL Typing, CHSL Skill Test, Hindi Typing, Mangal Font, 1750 Key Depressions, Gross Words">
+    
+    <!-- External Assets -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --ssc-blue: #1e40af; --ssc-slate: #0f172a; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+        .font-mono-typing { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Typing Area Highlights */
+        .char-correct { color: #1e293b; background: transparent; }
+        .char-incorrect { color: #ffffff; background: #dc2626; border-radius: 2px; }
+        .char-current { color: #1e40af; background: #dbeafe; border-radius: 2px; box-shadow: 0 0 0 2px #3b82f6; position: relative; }
+        .char-pending { color: #94a3b8; }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        
+        /* Utilities */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        [hidden] { display: none !important; }
+        
+        /* Sticky Header */
+        header { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        
+        /* Responsive Table */
+        @media (max-width: 768px) {
+            .hide-mobile { display: none; }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- NAVIGATION -->
+    <header class="sticky top-0 z-50 bg-white/90">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="javascript:void(0)" onclick="router.navigate('home')" class="flex items-center gap-2 group">
+                <div class="bg-blue-600 p-1.5 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-xl font-extrabold tracking-tighter">SSC<span class="text-blue-600">TypingPro</span></span>
+            </a>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-500">
+                <a href="javascript:void(0)" onclick="router.navigate('home')" class="hover:text-blue-600 transition">Dashboard</a>
+                <a href="javascript:void(0)" onclick="router.navigate('about')" class="hover:text-blue-600 transition">Exam Pattern</a>
+                <a href="javascript:void(0)" onclick="router.navigate('contact')" class="hover:text-blue-600 transition">Contact</a>
+            </nav>
+            <button class="md:hidden p-2 text-slate-500" onclick="ui.toggleMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MOBILE MENU -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 bg-white p-6 hidden flex-col gap-6 pt-24 animate-fade">
+        <a href="javascript:void(0)" onclick="router.navigate('home'); ui.toggleMenu()" class="text-2xl font-bold">Dashboard</a>
+        <a href="javascript:void(0)" onclick="router.navigate('about'); ui.toggleMenu()" class="text-2xl font-bold">Exam Pattern</a>
+        <a href="javascript:void(0)" onclick="router.navigate('contact'); ui.toggleMenu()" class="text-2xl font-bold">Contact</a>
+        <a href="javascript:void(0)" onclick="router.navigate('privacy'); ui.toggleMenu()" class="text-2xl font-bold">Privacy Policy</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="app-view" class="flex-grow"></main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 py-12 mt-12">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-12 pb-12 border-b border-slate-800">
+            <div>
+                <h3 class="text-white font-bold mb-4">SSC Typing Test Pro</h3>
+                <p class="text-xs leading-relaxed">Providing high-quality, free typing practice tools for government job aspirants. Not affiliated with the Staff Selection Commission.</p>
+            </div>
+            <div>
+                <h3 class="text-white font-bold mb-4">Legal</h3>
+                <ul class="text-xs space-y-2">
+                    <li><a href="javascript:void(0)" onclick="router.navigate('privacy')" class="hover:text-white">Privacy Policy</a></li>
+                    <li><a href="javascript:void(0)" onclick="router.navigate('contact')" class="hover:text-white">Contact Us</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white font-bold mb-4">Exam Info</h3>
+                <p class="text-xs">Supports CGL (DEST), CHSL (LDC/DEO), and MTS typing standards.</p>
+            </div>
+        </div>
+        <p class="text-center text-[10px] uppercase tracking-widest font-bold mt-8 text-slate-600">© 2024 • Practice Portal for Aspirants</p>
+    </footer>
+
+    <!-- PASSAGES DATA & LOGIC -->
+    <script>
+        const PASSAGES = [
+            {
+                id: 'cgl-01',
+                title: 'SSC CGL: Digital Transformation in India',
+                cat: 'CGL',
+                lang: 'English',
+                text: `The Digital India initiative was launched with a vision to transform India into a digitally empowered society and a knowledge economy. This flagship program of the Government of India aims to provide a fillip to the electronics manufacturing sector in the country. The initiative includes plans to connect rural areas with high-speed internet networks. Digital India has three core components: the creation of digital infrastructure, delivering services digitally and digital literacy. It seeks to ensure that government services are available to citizens electronically. The program also focuses on bridging the digital divide between the urban and rural population by providing various digital facilities. Public internet access programs are also part of this vision. The focus is also on E-Governance, which simplifies the interaction between citizens and the state. Information technology is seen as a major tool for inclusive growth. The mission targets to provide broadband to all gram panchayats and ensure universal mobile connectivity. This will enable better delivery of health, education and financial services in remote areas. The government is also encouraging startups to innovate in the digital space. Electronics manufacturing is being promoted to reduce imports. Cyber security remains a key priority to protect the digital infrastructure. The overall impact of this initiative is expected to boost the national GDP and create millions of jobs. In conclusion, Digital India is not just a government program but a massive movement towards a modern and efficient nation where technology reaches every doorstep.`
+            },
+            {
+                id: 'cgl-hi-01',
+                title: 'SSC CGL: डिजिटल इंडिया और समाज',
+                cat: 'CGL',
+                lang: 'Hindi',
+                text: `डिजिटल इंडिया पहल की शुरुआत भारत को डिजिटल रूप से सशक्त समाज और ज्ञान अर्थव्यवस्था में बदलने के दृष्टिकोण के साथ की गई थी। भारत सरकार के इस प्रमुख कार्यक्रम का उद्देश्य देश में इलेक्ट्रॉनिक्स विनिर्माण क्षेत्र को बढ़ावा देना है। इस पहल में ग्रामीण क्षेत्रों को उच्च गति वाले इंटरनेट नेटवर्क से जोड़ने की योजना शामिल है। डिजिटल इंडिया के तीन मुख्य घटक हैं: डिजिटल बुनियादी ढांचे का निर्माण, डिजिटल रूप से सेवाएं प्रदान करना और डिजिटल साक्षरता। यह सुनिश्चित करना चाहता है कि सरकारी सेवाएं नागरिकों को इलेक्ट्रॉनिक रूप से उपलब्ध हों। यह कार्यक्रम विभिन्न डिजिटल सुविधाएं प्रदान करके शहरी और ग्रामीण आबादी के बीच डिजिटल अंतर को पाटने पर भी ध्यान केंद्रित करता है। ई-गवर्नेंस के माध्यम से सरकारी प्रक्रियाओं को सरल और पारदर्शी बनाया जा रहा है। सूचना प्रौद्योगिकी को समावेशी विकास के एक प्रमुख उपकरण के रूप में देखा जाता है। मिशन का लक्ष्य सभी ग्राम पंचायतों को ब्रॉडबैंड प्रदान करना और सार्वभौमिक मोबाइल कनेक्टिविटी सुनिश्चित करना है। इससे दूरदराज के क्षेत्रों में स्वास्थ्य, शिक्षा और वित्तीय सेवाओं की बेहतर डिलीवरी हो सकेगी। सरकार डिजिटल क्षेत्र में नवाचार करने के लिए स्टार्टअप्स को भी प्रोत्साहित कर रही है। आयात कम करने के लिए इलेक्ट्रॉनिक्स विनिर्माण को बढ़ावा दिया जा रहा है। डिजिटल बुनियादी ढांचे की सुरक्षा के लिए साइबर सुरक्षा एक प्रमुख प्राथमिकता बनी हुई है। इस पहल का समग्र प्रभाव राष्ट्रीय जीडीपी को बढ़ावा देने और लाखों नौकरियां पैदा करने की उम्मीद है। निष्कर्षतः, डिजिटल इंडिया केवल एक सरकारी कार्यक्रम नहीं है बल्कि एक आधुनिक और कुशल राष्ट्र की ओर एक बड़ा आंदोलन है जहां प्रौद्योगिकी हर दरवाजे तक पहुंचती है।`
+            },
+            {
+                id: 'chsl-01',
+                title: 'SSC CHSL: Indian Constitutional Framework',
+                cat: 'CHSL',
+                lang: 'English',
+                text: `The Constitution of India is the supreme law of the land. It provides the framework for the political principles, procedures, and powers of the government. It was adopted by the Constituent Assembly on 26th November 1949 and came into effect on 26th January 1950. The Constitution provides for a federal structure with a unitary tilt. It establishes a parliamentary system of government at both the central and state levels. The fundamental rights guaranteed by the Constitution are essential for the holistic development of every citizen. These rights are justiciable, meaning they can be enforced through the courts of law. The Directive Principles of State Policy provide guidelines for the state to establish a social and economic democracy. The Constitution also outlines the fundamental duties of citizens. It is a living document that can be amended to meet the changing needs of society. The judiciary acts as the guardian of the Constitution. It ensures that the legislative and executive branches do not exceed their powers. The preamble clearly defines the core values of justice, liberty, equality and fraternity. Over the decades, the Constitution has guided India through various challenges, proving its resilience and strength. It remains the bedrock of Indian democracy and a symbol of national unity. Every citizen must understand the basic tenets of the Constitution to participate effectively in the democratic process. Respect for the law and the rights of others is central to the constitutional spirit.`
+            }
+        ];
+
+        const state = {
+            view: 'home',
+            lang: 'English',
+            activePassage: null,
+            input: '',
+            duration: 600,
+            timeLeft: 600,
+            isTesting: false,
+            timer: null,
+            history: JSON.parse(localStorage.getItem('ssc_typing_history') || '[]')
+        };
+
+        const router = {
+            navigate(view, id = null) {
+                state.view = view;
+                if (id) {
+                    state.activePassage = PASSAGES.find(p => p.id === id);
+                    state.input = '';
+                    state.timeLeft = state.duration;
+                }
+                if (state.timer) clearInterval(state.timer);
+                state.isTesting = false;
+                ui.render();
+            }
+        };
+
+        const engine = {
+            calculate() {
+                const text = state.activePassage.text;
+                const typed = state.input;
+                const elapsedMins = (state.duration - state.timeLeft) / 60 || 0.01;
+                
+                let mistakes = 0;
+                let correctChars = 0;
+                for (let i = 0; i < typed.length; i++) {
+                    if (typed[i] === text[i]) correctChars++;
+                    else mistakes++;
+                }
+
+                // 5 characters = 1 word (SSC Rule)
+                const grossWords = typed.length / 5;
+                const netWords = (typed.length - (mistakes * 5)) / 5;
+                
+                const grossWpm = Math.round(grossWords / elapsedMins);
+                const netWpm = Math.max(0, Math.round(netWords / elapsedMins));
+                const accuracy = typed.length > 0 ? Math.round((correctChars / typed.length) * 100) : 100;
+
+                return { grossWpm, netWpm, accuracy, mistakes, keystrokes: typed.length, grossWords: Math.floor(grossWords) };
+            },
+
+            start(e) {
+                if (state.isTesting || e.target.value.length === 0) return;
+                state.isTesting = true;
+                state.timer = setInterval(() => {
+                    state.timeLeft--;
+                    if (state.timeLeft <= 0) engine.stop();
+                    ui.updateLiveStats();
+                }, 1000);
+            },
+
+            stop() {
+                clearInterval(state.timer);
+                state.isTesting = false;
+                const results = engine.calculate();
+                
+                // Save History
+                const entry = {
+                    ...results,
+                    date: new Date().toISOString(),
+                    title: state.activePassage.title,
+                    lang: state.activePassage.lang
+                };
+                state.history.unshift(entry);
+                state.history = state.history.slice(0, 20);
+                localStorage.setItem('ssc_typing_history', JSON.stringify(state.history));
+                
+                router.navigate('results');
+            }
+        };
+
+        const ui = {
+            toggleMenu() {
+                const menu = document.getElementById('mobile-menu');
+                menu.classList.toggle('hidden');
+                menu.classList.toggle('flex');
+            },
+
+            updateLiveStats() {
+                const results = engine.calculate();
+                const timerEl = document.getElementById('timer-val');
+                const netEl = document.getElementById('net-val');
+                const grossEl = document.getElementById('gross-val');
+                const keyEl = document.getElementById('key-val');
+
+                if (timerEl) {
+                    const m = Math.floor(state.timeLeft / 60);
+                    const s = state.timeLeft % 60;
+                    timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                }
+                if (netEl) netEl.innerText = results.netWpm;
+                if (grossEl) grossEl.innerText = results.grossWords;
+                if (keyEl) keyEl.innerText = results.keystrokes;
+            },
+
+            handleInput(e) {
+                if (state.timeLeft <= 0) return;
+                if (!state.isTesting) engine.start(e);
+                
+                state.input = e.target.value;
+                this.renderPreview();
+                this.updateLiveStats();
+            },
+
+            renderPreview() {
+                const previewEl = document.getElementById('typing-preview');
+                if (!previewEl) return;
+                
+                const text = state.activePassage.text;
+                const input = state.input;
+                let html = '';
+                
+                for (let i = 0; i < text.length; i++) {
+                    let cls = 'char-pending';
+                    if (i < input.length) {
+                        cls = input[i] === text[i] ? 'char-correct' : 'char-incorrect';
+                    } else if (i === input.length) {
+                        cls = 'char-current';
+                    }
+                    html += `<span class="${cls}">${text[i]}</span>`;
+                }
+                previewEl.innerHTML = html;
+                
+                // Scroll into view
+                const current = previewEl.querySelector('.char-current');
+                if (current) current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            },
+
+            render() {
+                const container = document.getElementById('app-view');
+                if (state.view === 'home') {
+                    const filtered = PASSAGES.filter(p => p.lang === state.lang);
+                    container.innerHTML = `
+                        <div class="max-w-6xl mx-auto px-4 py-12 animate-fade">
+                            <div class="text-center mb-12">
+                                <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tighter">Prepare for <span class="text-blue-600">SSC Success</span></h1>
+                                <p class="text-slate-500 font-medium mb-8">Official 10 & 15 minute typing tests with accurate speed calculation.</p>
+                                <div class="inline-flex p-1 bg-slate-200 rounded-2xl">
+                                    <button onclick="state.lang='English'; ui.render()" class="px-8 py-2.5 rounded-xl text-sm font-bold transition ${state.lang === 'English' ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500'}">English</button>
+                                    <button onclick="state.lang='Hindi'; ui.render()" class="px-8 py-2.5 rounded-xl text-sm font-bold transition ${state.lang === 'Hindi' ? 'bg-white text-blue-600 shadow-md' : 'text-slate-500'}">Hindi (Mangal)</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                ${filtered.map(p => `
+                                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition group">
+                                        <div class="flex justify-between items-center mb-4">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">${p.cat} Exam</span>
+                                            <span class="text-[10px] text-slate-300 font-bold uppercase">${p.lang}</span>
+                                        </div>
+                                        <h3 class="text-xl font-bold mb-6 text-slate-800">${p.title}</h3>
+                                        <button onclick="router.navigate('test', '${p.id}')" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-blue-600 transition shadow-lg active:scale-95">Start Practice</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            ${state.history.length > 0 ? `
+                                <div class="mt-20">
+                                    <h2 class="text-2xl font-bold mb-8">Your Recent Activity</h2>
+                                    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                                        <table class="w-full text-left">
+                                            <thead class="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                <tr>
+                                                    <th class="px-8 py-4">Date</th>
+                                                    <th class="px-8 py-4">Test Title</th>
+                                                    <th class="px-8 py-4 text-center">Net WPM</th>
+                                                    <th class="px-8 py-4 text-center hide-mobile">Accuracy</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-slate-100">
+                                                ${state.history.map(h => `
+                                                    <tr>
+                                                        <td class="px-8 py-5 text-xs text-slate-400">${new Date(h.date).toLocaleDateString()}</td>
+                                                        <td class="px-8 py-5 font-bold text-slate-700">${h.title}</td>
+                                                        <td class="px-8 py-5 text-center text-xl font-black text-blue-600">${h.netWpm}</td>
+                                                        <td class="px-8 py-5 text-center font-bold text-emerald-500 hide-mobile">${h.accuracy}%</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else if (state.view === 'test') {
+                    container.innerHTML = `
+                        <div class="max-w-5xl mx-auto px-4 py-8 animate-fade">
+                            <div class="flex flex-col md:flex-row justify-between items-end gap-4 mb-8">
+                                <div>
+                                    <h1 class="text-3xl font-black text-slate-900">${state.activePassage.title}</h1>
+                                    <p class="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em] mt-1">Practice Mode • ${state.activePassage.lang}</p>
+                                </div>
+                                <div class="flex gap-2 p-1 bg-slate-200 rounded-xl">
+                                    <button onclick="state.duration=600; state.timeLeft=600; ui.render()" class="px-5 py-2 rounded-lg text-xs font-bold ${state.duration === 600 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}">10 Min</button>
+                                    <button onclick="state.duration=900; state.timeLeft=900; ui.render()" class="px-5 py-2 rounded-lg text-xs font-bold ${state.duration === 900 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}">15 Min</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Timer</p>
+                                    <p id="timer-val" class="text-3xl font-mono-typing text-blue-600 font-bold">10:00</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Net WPM</p>
+                                    <p id="net-val" class="text-3xl font-mono-typing text-emerald-600 font-bold">0</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Gross Words</p>
+                                    <p id="gross-val" class="text-3xl font-mono-typing text-blue-500 font-bold">0</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Keystrokes</p>
+                                    <p id="key-val" class="text-3xl font-mono-typing text-slate-800 font-bold">0</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-[2rem] shadow-2xl border border-slate-200 overflow-hidden">
+                                <div id="typing-preview" class="p-8 md:p-12 bg-slate-50 h-72 overflow-y-auto no-scrollbar font-mono-typing text-2xl leading-[2] text-slate-300 border-b border-slate-100"></div>
+                                <textarea id="typing-box" oninput="ui.handleInput(event)" class="w-full h-72 p-8 md:p-12 font-mono-typing text-2xl leading-[2] outline-none resize-none bg-white text-slate-800" placeholder="Timer starts when you start typing..." spellcheck="false" autofocus></textarea>
+                            </div>
+                            
+                            <div class="mt-8 flex justify-between items-center text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                                <span>Note: 5 Key Depressions = 1 Word</span>
+                                <button onclick="router.navigate('home')" class="hover:text-red-500">Cancel and Exit</button>
+                            </div>
+                        </div>
+                    `;
+                    this.renderPreview();
+                    this.updateLiveStats();
+                } else if (state.view === 'results') {
+                    const stats = state.history[0];
+                    container.innerHTML = `
+                        <div class="max-w-3xl mx-auto px-4 py-12 animate-fade">
+                            <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden">
+                                <div class="bg-slate-900 p-12 text-center text-white">
+                                    <h2 class="text-4xl font-black mb-2">Test Completed</h2>
+                                    <p class="text-slate-400 font-bold uppercase tracking-widest text-xs">Official Performance Scorecard</p>
+                                </div>
+                                <div class="p-12">
+                                    <div class="grid grid-cols-2 gap-8 mb-12">
+                                        <div class="text-center p-8 bg-blue-50 rounded-[2rem] border border-blue-100">
+                                            <p class="text-[10px] font-black uppercase text-blue-500 mb-2">Net Speed</p>
+                                            <p class="text-6xl font-black text-blue-700">${stats.netWpm} <span class="text-xl font-medium">WPM</span></p>
+                                        </div>
+                                        <div class="text-center p-8 bg-emerald-50 rounded-[2rem] border border-emerald-100">
+                                            <p class="text-[10px] font-black uppercase text-emerald-500 mb-2">Accuracy</p>
+                                            <p class="text-6xl font-black text-emerald-700">${stats.accuracy}%</p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                                        <div class="text-center">
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Gross WPM</p>
+                                            <p class="text-xl font-bold">${stats.grossWpm}</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Gross Words</p>
+                                            <p class="text-xl font-bold">${stats.grossWords}</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Mistakes</p>
+                                            <p class="text-xl font-bold text-red-500">${stats.mistakes}</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Keystrokes</p>
+                                            <p class="text-xl font-bold">${stats.keystrokes}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="router.navigate('home')" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl hover:bg-blue-700 shadow-xl transition-all">Back to Dashboard</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (state.view === 'about') {
+                    container.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-4 py-16 animate-fade">
+                            <h1 class="text-4xl font-black mb-8">SSC Typing Standards</h1>
+                            <div class="space-y-8">
+                                <div class="bg-white p-8 rounded-3xl border border-slate-200">
+                                    <h2 class="text-2xl font-bold text-blue-600 mb-4">Calculation Formula</h2>
+                                    <p class="text-slate-600 leading-relaxed mb-4">SSC uses a specific formula to calculate typing speed:</p>
+                                    <ul class="space-y-4 text-sm font-medium">
+                                        <li class="flex items-center gap-3"><span class="w-6 h-6 bg-slate-100 rounded flex items-center justify-center text-[10px]">1</span> 5 Key depressions (including spaces) = 1 Word.</li>
+                                        <li class="flex items-center gap-3"><span class="w-6 h-6 bg-slate-100 rounded flex items-center justify-center text-[10px]">2</span> Gross Words = Total Strokes / 5</li>
+                                        <li class="flex items-center gap-3"><span class="w-6 h-6 bg-slate-100 rounded flex items-center justify-center text-[10px]">3</span> Net Speed = [Total Strokes - (Errors * 5)] / 5 / Time</li>
+                                    </ul>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-slate-900 text-white p-8 rounded-3xl">
+                                        <h3 class="font-bold text-xl mb-4">CGL / CHSL DEST</h3>
+                                        <p class="text-slate-400 text-sm">Requires 1750-2000 key depressions in 15 minutes. Qualifying accuracy is usually 93-95%.</p>
+                                    </div>
+                                    <div class="bg-blue-600 text-white p-8 rounded-3xl">
+                                        <h3 class="font-bold text-xl mb-4">MTS Typing</h3>
+                                        <p class="text-blue-100 text-sm">Basic qualifying speed of 30-35 WPM depending on category and vacancy type.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (state.view === 'privacy') {
+                    container.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-4 py-16 animate-fade">
+                            <h1 class="text-4xl font-black mb-8">Privacy & Data</h1>
+                            <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 text-slate-600 leading-relaxed">
+                                <p class="mb-6">We respect your privacy. This application is designed to be privacy-first.</p>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4">Local Storage Only</h3>
+                                <p class="mb-6">All your typing results and history are stored locally in your own web browser. We never upload your typing data to any server. If you clear your browser cache, your history will be removed.</p>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4">No Personal Info</h3>
+                                <p>You do not need to register or provide an email to use our portal. This is a free tool for everyone.</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (state.view === 'contact') {
+                    container.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-4 py-16 animate-fade text-center">
+                            <h1 class="text-4xl font-black mb-4">Get in Touch</h1>
+                            <p class="text-slate-500 mb-12">For feedback or issues regarding the tool.</p>
+                            <div class="bg-white p-12 rounded-[2.5rem] border border-slate-200 inline-block">
+                                <p class="text-lg font-bold text-slate-800 mb-2">Support Email</p>
+                                <a href="mailto:support@ssctypingpro.com" class="text-2xl font-black text-blue-600 hover:underline">support@ssctypingpro.com</a>
+                                <p class="text-xs text-slate-400 mt-8 font-bold uppercase tracking-widest">Expected reply within 48 hours</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        // Boot the app
+        ui.render();
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
