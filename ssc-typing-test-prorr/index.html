@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC Typing Pro - Official Skill Test Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .font-mono-typing { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Typing Highlights */
+        .char-correct { color: #1e293b; background: transparent; }
+        .char-incorrect { color: #ffffff; background: #dc2626; border-radius: 2px; }
+        .char-current { 
+            color: #1e40af; 
+            background: #dbeafe; 
+            border-radius: 2px; 
+            box-shadow: 0 0 0 2px #3b82f6; 
+            position: relative;
+            display: inline-block; /* Helps with scroll calculation */
+        }
+        .char-pending { color: #94a3b8; }
+        
+        /* Controlled passage viewport */
+        #typing-preview {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 2.2;
+            height: 240px; /* Fixed height for auto-sliding */
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        /* Hide scrollbars but allow scrolling */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #config-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="app.showHome()">
+                <div class="bg-blue-600 p-2 rounded-lg shadow-md">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-xl font-extrabold tracking-tighter">SSC<span class="text-blue-600">TypingPro</span></span>
+            </div>
+            <button class="p-2 text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- APP CONTENT -->
+    <main id="app-view" class="flex-grow"></main>
+
+    <!-- CONFIG MODAL -->
+    <div id="config-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-fade">
+            <h3 class="text-2xl font-black text-slate-900 mb-2">Set Test Duration</h3>
+            <p class="text-slate-500 text-sm mb-8">Select your timing before beginning.</p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <button onclick="app.setDuration(120, this)" class="duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all">2 Minutes</button>
+                <button onclick="app.setDuration(300, this)" class="duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all">5 Minutes</button>
+                <button onclick="app.setDuration(600, this)" class="duration-btn py-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-bold">10 Minutes</button>
+                <button onclick="app.setDuration(900, this)" class="duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all">15 Minutes</button>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="app.closeModal()" class="flex-1 py-4 text-slate-400 font-bold">Cancel</button>
+                <button onclick="app.startTest()" class="flex-[2] py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg">BEGIN TEST</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-100 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">© 2024 SSC Typing Pro • Official Exam Standards</p>
+        </div>
+    </footer>
+
+    <script>
+        const PASSAGES = [
+            {
+                id: 'p1', cat: 'CGL EXAM', lang: 'English',
+                title: 'SSC CGL: Digital Transformation in India',
+                text: `The Digital India initiative was launched with a vision to transform India into a digitally empowered society and a knowledge economy. This flagship program of the Government of India aims to provide a fillip to the electronics manufacturing sector in the country. The initiative includes plans to connect rural areas with high-speed internet networks. Digital India has three core components: the creation of digital infrastructure, delivering services digitally and digital literacy. It seeks to ensure that government services are available to citizens electronically. The program also focuses on bridging the digital divide between the urban and rural population by providing various digital facilities. Public internet access programs are also part of this vision. The focus is also on E-Governance, which simplifies the interaction between citizens and the state. Information technology is seen as a major tool for inclusive growth. The mission targets to provide broadband to all gram panchayats and ensure universal mobile connectivity. This will enable better delivery of health, education and financial services in remote areas. The government is also encouraging startups to innovate in the digital space. Electronics manufacturing is being promoted to reduce imports. Cyber security remains a key priority to protect the digital infrastructure. The overall impact of this initiative is expected to boost the national GDP and create millions of jobs. In conclusion, Digital India is not just a government program but a movement towards a more efficient and transparent future for all citizens of this great nation.`
+            },
+            {
+                id: 'p2', cat: 'CHSL EXAM', lang: 'English',
+                title: 'SSC CHSL: Indian Constitutional Framework',
+                text: `The Constitution of India is the supreme law of the land. It provides the framework for the political principles, procedures, and powers of the government. It was adopted by the Constituent Assembly on 26th November 1949 and came into effect on 26th January 1950. The Constitution provides for a federal structure with a unitary tilt. It establishes a parliamentary system of government at both the central and state levels. The fundamental rights guaranteed by the Constitution are essential for the holistic development of every citizen. These rights are justiciable, meaning they can be enforced through the courts of law. The Directive Principles of State Policy provide guidelines for the state to establish a social and economic democracy. The Constitution also outlines the fundamental duties of citizens. It is a living document that can be amended to meet the changing needs of society. The judiciary acts as the guardian of the Constitution. It ensures that the legislative and executive branches do not exceed their powers. The preamble clearly defines the core values of justice, liberty, equality and fraternity. Over the decades, the Constitution has guided India through various challenges, proving its resilience and strength. It remains the bedrock of Indian democracy and a symbol of national unity for over a billion people.`
+            },
+            {
+                id: 'p3', cat: 'MTS EXAM', lang: 'English',
+                title: 'SSC MTS: Environmental Policy',
+                text: `Sustainable development is defined as development that meets the needs of the present without compromising the ability of future generations to meet their own needs. The United Nations has outlined seventeen Sustainable Development Goals to be achieved by 2030. These goals address global challenges related to poverty, inequality, climate change, environmental degradation, peace, and justice. India is committed to achieving these goals through various national programs and policies. The focus is on promoting inclusive growth that benefits all sections of society. Environmental protection is a key aspect of this development model. Forests and biodiversity play a vital role in maintaining the ecological balance. Conservation efforts are being intensified to protect endangered species and their habitats. Pollution control measures are being implemented to improve air and water quality. Public participation is crucial for the success of these environmental initiatives. Education and awareness campaigns are being conducted to sensitize citizens about the importance of sustainability. Transitioning to renewable energy sources like solar and wind power is a major priority. This will reduce our dependence on fossil fuels and mitigate the impact of climate change. A circular economy model is being encouraged to minimize waste and promote recycling for a greener planet.`
+            },
+            {
+                id: 'p4', cat: 'CGL EXAM', lang: 'Hindi',
+                title: 'SSC CGL: डिजिटल इंडिया और समाज',
+                text: `डिजिटल इंडिया पहल की शुरुआत भारत को डिजिटल रूप से सशक्त समाज और ज्ञान अर्थव्यवस्था में बदलने के दृष्टिकोण के साथ की गई थी। भारत सरकार के इस प्रमुख कार्यक्रम का उद्देश्य देश में इलेक्ट्रॉनिक्स विनिर्माण क्षेत्र को बढ़ावा देना है। इस पहल में ग्रामीण क्षेत्रों को उच्च गति वाले इंटरनेट नेटवर्क से जोड़ने की योजना शामिल है। डिजिटल इंडिया के तीन मुख्य घटक हैं: डिजिटल बुनियादी ढांचे का निर्माण, डिजिटल रूप से सेवाएं प्रदान करना और डिजिटल साक्षरता। यह सुनिश्चित करना चाहता है कि सरकारी सेवाएं नागरिकों को इलेक्ट्रॉनिक रूप से उपलब्ध हों। यह कार्यक्रम विभिन्न डिजिटल सुविधाएं प्रदान करके शहरी और ग्रामीण आबादी के बीच डिजिटल अंतर को पाटने पर भी ध्यान केंद्रित करता है। ई-गवर्नेंस के माध्यम से सरकारी प्रक्रियाओं को सरल और पारदर्शी बनाया जा रहा है। सूचना प्रौद्योगिकी को समावेशी विकास के एक प्रमुख उपकरण के रूप में देखा जाता है। मिशन का लक्ष्य सभी ग्राम पंचायतों को ब्रॉडबैंड प्रदान करना और सार्वभौमिक मोबाइल कनेक्टिविटी सुनिश्चित करना है। इससे दूरदराज के क्षेत्रों में स्वास्थ्य, शिक्षा और वित्तीय सेवाओं की बेहतर डिलीवरी हो सकेगी। सरकार डिजिटल क्षेत्र में नवाचार करने के लिए स्टार्टअप्स को भी प्रोत्साहित कर रही है। आयात कम करने के लिए इलेक्ट्रॉनिक्स विनिर्माण को बढ़ावा दिया जा रहा है। डिजिटल बुनियादी ढांचे की सुरक्षा के लिए साइबर सुरक्षा एक प्रमुख प्राथमिकता बनी हुई है। इस पहल का समग्र प्रभाव राष्ट्रीय जीडीपी को बढ़ावा देने और लाखों नौकरियां पैदा करने की उम्मीद है। यह भारत की डिजिटल यात्रा में एक महत्वपूर्ण मील का पत्थर साबित होगा।`
+            }
+        ];
+
+        const app = {
+            state: {
+                view: 'home',
+                lang: 'English',
+                duration: 600,
+                selectedPassage: null,
+                input: '',
+                timeLeft: 600,
+                isTesting: false,
+                timer: null,
+                history: JSON.parse(localStorage.getItem('ssc_history_pro_v2') || '[]')
+            },
+
+            init() {
+                this.showHome();
+            },
+
+            showHome() {
+                this.state.view = 'home';
+                if (this.state.timer) clearInterval(this.state.timer);
+                this.state.isTesting = false;
+                this.state.input = '';
+                this.render();
+            },
+
+            openConfig(id) {
+                if (id === 'random') {
+                    const filtered = PASSAGES.filter(p => p.lang === this.state.lang);
+                    this.state.selectedPassage = filtered[Math.floor(Math.random() * filtered.length)];
+                } else {
+                    this.state.selectedPassage = PASSAGES.find(p => p.id === id);
+                }
+                document.getElementById('config-modal').classList.remove('hidden');
+            },
+
+            closeModal() {
+                document.getElementById('config-modal').classList.add('hidden');
+            },
+
+            setDuration(seconds, btn) {
+                this.state.duration = seconds;
+                this.state.timeLeft = seconds;
+                document.querySelectorAll('.duration-btn').forEach(el => {
+                    el.className = "duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all";
+                });
+                btn.className = "duration-btn py-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-bold";
+            },
+
+            startTest() {
+                this.closeModal();
+                this.state.view = 'test';
+                this.state.input = '';
+                this.state.timeLeft = this.state.duration;
+                this.render();
+                setTimeout(() => {
+                    const ta = document.getElementById('typing-area');
+                    if (ta) ta.focus();
+                }, 100);
+            },
+
+            handleInput(e) {
+                if (!this.state.isTesting && e.target.value.length > 0) {
+                    this.state.isTesting = true;
+                    this.state.timer = setInterval(() => {
+                        this.state.timeLeft--;
+                        if (this.state.timeLeft <= 0) this.finishTest();
+                        this.updateUI();
+                    }, 1000);
+                }
+
+                const val = e.target.value;
+                if (val.length <= this.state.selectedPassage.text.length) {
+                    this.state.input = val;
+                    this.renderPreview();
+                    this.updateUI();
+                    if (val.length === this.state.selectedPassage.text.length) this.finishTest();
+                }
+            },
+
+            calculate() {
+                const text = this.state.selectedPassage.text;
+                const typed = this.state.input;
+                const elapsedMins = (this.state.duration - this.state.timeLeft) / 60 || 0.01;
+                
+                let mistakes = 0;
+                let correct = 0;
+                for (let i = 0; i < typed.length; i++) {
+                    if (typed[i] === text[i]) correct++;
+                    else mistakes++;
+                }
+
+                const gwpm = Math.round((typed.length / 5) / elapsedMins);
+                const nwpm = Math.max(0, Math.round(((typed.length - (mistakes * 5)) / 5) / elapsedMins));
+                const acc = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 100;
+
+                return { gwpm, nwpm, acc, mistakes, keys: typed.length };
+            },
+
+            updateUI() {
+                const results = this.calculate();
+                const t = document.getElementById('ui-timer');
+                const n = document.getElementById('ui-net');
+                const g = document.getElementById('ui-gross');
+                const k = document.getElementById('ui-keys');
+
+                if (t) {
+                    const mins = Math.floor(this.state.timeLeft / 60);
+                    const secs = this.state.timeLeft % 60;
+                    t.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }
+                if (n) n.innerText = results.nwpm;
+                if (g) g.innerText = results.gwpm;
+                if (k) k.innerText = results.keys;
+            },
+
+            finishTest() {
+                clearInterval(this.state.timer);
+                this.state.isTesting = false;
+                const results = this.calculate();
+                const entry = {
+                    ...results,
+                    date: new Date().toISOString(),
+                    title: this.state.selectedPassage.title,
+                    lang: this.state.lang
+                };
+                this.state.history.unshift(entry);
+                this.state.history = this.state.history.slice(0, 10);
+                localStorage.setItem('ssc_history_pro_v2', JSON.stringify(this.state.history));
+                this.state.view = 'results';
+                this.render();
+            },
+
+            renderPreview() {
+                const container = document.getElementById('typing-preview');
+                if (!container) return;
+                
+                const text = this.state.selectedPassage.text;
+                const input = this.state.input;
+                let html = '';
+                
+                for (let i = 0; i < text.length; i++) {
+                    let cls = 'char-pending';
+                    if (i < input.length) {
+                        cls = input[i] === text[i] ? 'char-correct' : 'char-incorrect';
+                    } else if (i === input.length) {
+                        cls = 'char-current';
+                    }
+                    html += `<span class="${cls}">${text[i]}</span>`;
+                }
+                container.innerHTML = html;
+
+                // Robust Auto-Scroll: Slide to active line
+                const currentEl = container.querySelector('.char-current');
+                if (currentEl) {
+                    currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            },
+
+            render() {
+                const container = document.getElementById('app-view');
+                if (this.state.view === 'home') {
+                    const filtered = PASSAGES.filter(p => p.lang === this.state.lang);
+                    container.innerHTML = `
+                        <div class="max-w-xl mx-auto px-4 py-8 animate-fade">
+                            <div class="p-1.5 bg-slate-200/50 rounded-2xl flex mb-12 border border-white">
+                                <button onclick="app.state.lang='English'; app.render()" class="flex-1 py-4 rounded-xl font-bold text-sm transition-all ${this.state.lang === 'English' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}">English</button>
+                                <button onclick="app.state.lang='Hindi'; app.render()" class="flex-1 py-4 rounded-xl font-bold text-sm transition-all ${this.state.lang === 'Hindi' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}">Hindi (Mangal)</button>
+                            </div>
+
+                            <div class="space-y-6">
+                                ${filtered.map(p => `
+                                    <div class="bg-white p-8 rounded-[2.5rem] card-shadow border border-slate-50 flex flex-col items-start gap-4">
+                                        <div class="flex justify-between w-full">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">${p.cat}</span>
+                                            <span class="text-[10px] text-slate-300 font-bold uppercase tracking-widest">${p.lang}</span>
+                                        </div>
+                                        <h3 class="text-2xl font-bold text-slate-800 leading-tight mb-2">${p.title}</h3>
+                                        <button onclick="app.openConfig('${p.id}')" class="w-full bg-slate-900 text-white font-black py-5 rounded-2xl hover:bg-blue-600 shadow-xl transition-all">Start Practice</button>
+                                    </div>
+                                `).join('')}
+                                
+                                <div class="bg-slate-900 p-8 rounded-[2.5rem] card-shadow flex flex-col items-start gap-4 text-white">
+                                    <div class="flex justify-between w-full opacity-60">
+                                        <span class="text-[10px] font-black uppercase tracking-widest">Surprise Me</span>
+                                        <span class="text-[10px] font-bold uppercase tracking-widest">${this.state.lang}</span>
+                                    </div>
+                                    <h3 class="text-2xl font-bold mb-2">Random Practice Session</h3>
+                                    <button onclick="app.openConfig('random')" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl">Quick Start</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'test') {
+                    const m = Math.floor(this.state.timeLeft / 60);
+                    const s = this.state.timeLeft % 60;
+                    container.innerHTML = `
+                        <div class="max-w-6xl mx-auto px-4 py-8 animate-fade">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                                <div class="bg-white p-6 rounded-3xl border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-black mb-1">Timer</p>
+                                    <p id="ui-timer" class="text-3xl font-mono-typing text-blue-600 font-bold">${m}:${s < 10 ? '0' : ''}${s}</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-3xl border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-black mb-1">Net WPM</p>
+                                    <p id="ui-net" class="text-3xl font-mono-typing text-emerald-600 font-bold">0</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-3xl border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-black mb-1">Gross WPM</p>
+                                    <p id="ui-gross" class="text-3xl font-mono-typing text-blue-500 font-bold">0</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-3xl border border-slate-200 text-center">
+                                    <p class="text-[10px] text-slate-400 uppercase tracking-widest font-black mb-1">Depressions</p>
+                                    <p id="ui-keys" class="text-3xl font-mono-typing text-slate-800 font-bold">0</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden mb-8">
+                                <div class="px-10 py-4 bg-slate-900 flex justify-between items-center text-white">
+                                    <span class="text-[10px] font-black uppercase tracking-widest">${this.state.selectedPassage.title}</span>
+                                    <span class="text-[10px] font-black opacity-50 uppercase tracking-widest">${this.state.duration / 60} MIN</span>
+                                </div>
+                                <div id="typing-preview" class="p-10 md:p-12 font-mono-typing text-2xl no-scrollbar"></div>
+                            </div>
+
+                            <div class="bg-white rounded-[2.5rem] shadow-2xl border-4 border-blue-50 overflow-hidden">
+                                <textarea id="typing-area" oninput="app.handleInput(event)" 
+                                    class="w-full h-80 p-10 md:p-12 font-mono-typing text-2xl leading-[2.2] resize-none outline-none text-slate-800" 
+                                    placeholder="Click and start typing to begin timer..."></textarea>
+                            </div>
+                            
+                            <div class="mt-8 flex justify-between px-6 items-center">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">SSC 5-STREKE PER WORD STANDARD</span>
+                                <button onclick="app.showHome()" class="text-xs font-bold text-red-500">Cancel & Exit</button>
+                            </div>
+                        </div>
+                    `;
+                    this.renderPreview();
+                } else if (this.state.view === 'results') {
+                    const stats = this.state.history[0];
+                    container.innerHTML = `
+                        <div class="max-w-2xl mx-auto px-4 py-16 animate-fade text-center">
+                            <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden">
+                                <div class="bg-slate-900 p-12 text-white">
+                                    <h2 class="text-4xl font-black mb-2">Test Finished!</h2>
+                                    <p class="text-slate-400 font-black text-[10px] uppercase">Official Scorecard</p>
+                                </div>
+                                <div class="p-12">
+                                    <div class="grid grid-cols-2 gap-8 mb-12">
+                                        <div class="p-8 bg-blue-50 rounded-[2rem]">
+                                            <p class="text-[10px] font-black uppercase text-blue-500">Net WPM</p>
+                                            <p class="text-6xl font-black text-blue-700">${stats.nwpm}</p>
+                                        </div>
+                                        <div class="p-8 bg-emerald-50 rounded-[2rem]">
+                                            <p class="text-[10px] font-black uppercase text-emerald-500">Accuracy</p>
+                                            <p class="text-6xl font-black text-emerald-700">${stats.acc}%</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="app.showHome()" class="w-full bg-blue-600 text-white font-black py-6 rounded-2xl shadow-xl">Back to Dashboard</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        app.init();
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
