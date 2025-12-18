@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSCTypingPro - Official Skill Test Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; overflow-x: hidden; }
+        .font-mono-typing { font-family: 'JetBrains Mono', monospace; }
+        
+        .char-correct { color: #1e293b; background: transparent; }
+        .char-incorrect { color: #ffffff; background: #dc2626; border-radius: 1px; }
+        .char-current { 
+            color: #1e40af; 
+            background: #dbeafe; 
+            box-shadow: inset 0 -3px 0 0 #3b82f6;
+        }
+        .char-pending { color: #94a3b8; }
+        
+        :root {
+            --lh: 2.2; 
+            --fs: 1.5rem; 
+        }
+
+        #typing-preview-container {
+            height: calc(4 * var(--fs) * var(--lh) + 2rem); 
+            overflow: hidden;
+            position: relative;
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        #typing-preview {
+            white-space: pre-wrap;
+            word-break: keep-all; 
+            overflow-wrap: break-word;
+            line-height: var(--lh);
+            font-size: var(--fs);
+            padding: 1rem 1.5rem;
+            margin: 0;
+            display: block;
+            scroll-behavior: smooth;
+            height: 100%;
+            overflow-y: scroll; 
+            user-select: none;
+            scrollbar-width: none;
+        }
+        #typing-preview::-webkit-scrollbar { display: none; }
+
+        #typing-area-wrapper {
+            height: calc(2 * var(--fs) * var(--lh) + 2rem);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 3px solid #dbeafe;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        #typing-area {
+            line-height: var(--lh);
+            font-size: var(--fs);
+            height: 100%;
+            padding: 1rem 1.5rem;
+            resize: none;
+            outline: none;
+            border: none;
+            width: 100%;
+            background: transparent;
+            display: block;
+            overflow-y: auto;
+        }
+
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #config-modal { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(8px); }
+        #dropdown-menu { transform-origin: top right; }
+
+        .btn-black { 
+            background-color: #0f172a; 
+            color: white; 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .btn-black:hover { background-color: #1e293b; transform: translateY(-1px); }
+
+        .practice-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            cursor: pointer;
+        }
+        .practice-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-100 shadow-sm sticky top-0 z-[100]">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="app.showHome()">
+                <div class="bg-blue-600 p-1.5 rounded-lg">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-xl font-black tracking-tighter text-slate-900 uppercase">SSCTyping<span class="text-blue-600">Pro</span></span>
+            </div>
+            
+            <!-- Persistent Top-Right Navigation Button -->
+            <div class="relative">
+                <button onclick="app.toggleMenu()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition-all">
+                    <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest hidden sm:inline">Menu</span>
+                    <svg class="w-5 h-5 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                
+                <!-- Dropdown -->
+                <div id="dropdown-menu" class="hidden absolute right-0 mt-3 w-56 bg-white border border-slate-100 shadow-2xl rounded-2xl py-3 overflow-hidden animate-fade z-[110]">
+                    <div class="px-4 py-2 border-b border-slate-50 mb-2">
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Quick Access</p>
+                    </div>
+                    <a href="javascript:void(0)" onclick="app.showHome()" class="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 text-slate-700 font-bold text-xs transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        Dashboard
+                    </a>
+                    <a href="javascript:void(0)" onclick="app.setView('about')" class="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 text-slate-700 font-bold text-xs transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Exam Guide
+                    </a>
+                    <a href="javascript:void(0)" onclick="app.setView('contact')" class="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 text-slate-700 font-bold text-xs transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        Technical Support
+                    </a>
+                    <div class="h-px bg-slate-50 my-2"></div>
+                    <a href="javascript:void(0)" onclick="app.setView('privacy')" class="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider transition-colors">Privacy Policy</a>
+                    <a href="javascript:void(0)" onclick="app.setView('terms')" class="flex items-center gap-3 px-5 py-3 hover:bg-blue-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW -->
+    <main id="app-view" class="flex-grow bg-slate-50/20"></main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-500 py-16 mt-auto">
+        <div class="max-w-7xl mx-auto px-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <span class="text-2xl font-black tracking-tighter text-white uppercase">SSCTyping<span class="text-blue-600">Pro</span></span>
+                    <p class="text-xs font-bold uppercase tracking-widest mt-6 text-slate-400 leading-loose max-w-sm">The gold standard for staff selection commission aspirants. Focused, fast, and uncompromising on quality.</p>
+                </div>
+                <div>
+                    <h4 class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-6">Explore</h4>
+                    <nav class="flex flex-col gap-4">
+                        <a href="javascript:void(0)" onclick="app.showHome()" class="text-xs font-bold hover:text-white transition">Practice Dashboard</a>
+                        <a href="javascript:void(0)" onclick="app.setView('about')" class="text-xs font-bold hover:text-white transition">About the Test</a>
+                        <a href="javascript:void(0)" onclick="app.setView('contact')" class="text-xs font-bold hover:text-white transition">Contact Support</a>
+                    </nav>
+                </div>
+                <div>
+                    <h4 class="text-[10px] font-black text-slate-600 uppercase tracking-widest mb-6">Compliance</h4>
+                    <nav class="flex flex-col gap-4">
+                        <a href="javascript:void(0)" onclick="app.setView('privacy')" class="text-xs font-bold hover:text-white transition">Privacy Center</a>
+                        <a href="javascript:void(0)" onclick="app.setView('terms')" class="text-xs font-bold hover:text-white transition">Terms of Use</a>
+                        <p class="text-[10px] text-slate-700 mt-6">© 2024 SSCTypingPro</p>
+                    </nav>
+                </div>
+            </div>
+            <div class="pt-10 border-t border-slate-800 text-center">
+                <p class="text-[9px] font-black uppercase tracking-[0.3em] text-slate-700">Official Simulation Environment</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CONFIG MODAL -->
+    <div id="config-modal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-6">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-sm p-10 shadow-2xl animate-fade">
+            <h3 class="text-2xl font-black text-slate-900 mb-2" id="modal-title">Session Setup</h3>
+            <p class="text-slate-500 text-xs font-bold mb-8">Select your target practice time.</p>
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <button onclick="app.setDuration(120, this)" class="duration-btn py-4 rounded-2xl border border-slate-100 font-black text-slate-400 hover:border-blue-500 transition-all text-[10px] uppercase">2 Min</button>
+                <button onclick="app.setDuration(300, this)" class="duration-btn py-4 rounded-2xl border border-slate-100 font-black text-slate-400 hover:border-blue-500 transition-all text-[10px] uppercase">5 Min</button>
+                <button onclick="app.setDuration(600, this)" class="duration-btn py-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-black text-[10px] uppercase">10 Min</button>
+                <button onclick="app.setDuration(900, this)" class="duration-btn py-4 rounded-2xl border border-slate-100 font-black text-slate-400 hover:border-blue-500 transition-all text-[10px] uppercase">15 Min</button>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="app.closeModal()" class="flex-1 font-black text-slate-400 uppercase tracking-widest text-[9px]">Cancel</button>
+                <button onclick="app.startTest()" class="flex-[2] py-4 bg-blue-600 text-white font-black rounded-2xl shadow-xl uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all">Launch Test</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // High-Quality Long Passages Pool (~1000 words logic)
+        const PASSAGE_POOLS = {
+            CGL: [
+                "The rapid expansion of digital technology has fundamentally reshaped the Indian economy over the last decade. With the launch of the Digital India initiative in 2015, the government aimed to transform the country into a digitally empowered society and knowledge economy. One of the most significant pillars of this transformation has been the Unified Payments Interface (UPI), which revolutionized real-time payments. As of 2023, India recorded billions of digital transactions annually, surpassing many developed nations. This shift towards a cashless economy has not only increased transparency but has also brought millions of unbanked individuals into the formal financial system. The JAM Trinity (Jan Dhan, Aadhaar, and Mobile) has been instrumental in ensuring that government subsidies reach the intended beneficiaries directly, eliminating leakages and corruption. Furthermore, the IT and BPM sectors continue to be the torchbearers of India's service exports. The sector contributes significantly to the country's GDP, employing over 5 million professionals. The rise of startups in sectors like FinTech, EdTech, and HealthTech demonstrates the entrepreneurial spirit of the youth. However, this digital boom brings challenges, primarily concerning data privacy and cybersecurity. The introduction of the Digital Personal Data Protection Act is a step forward in regulating how personal data is processed. As we move towards a $5 trillion economy, the integration of Artificial Intelligence (AI) and Machine Learning (ML) in agriculture and manufacturing will be crucial. The government must ensure that the digital divide between urban and rural areas is bridged, ensuring that the benefits of technology reach the grassroots level. This massive undertaking requires coordinated efforts from both the public and private sectors to establish robust infrastructure, including high-speed fiber networks and satellite internet for remote connectivity. In the coming years, the 5G rollout will provide the backbone for the Internet of Things (IoT), potentially revolutionizing sectors like precision agriculture and remote healthcare. The digital literacy of the elderly and the rural population remains a significant focus, with several non-profit organizations and local bodies working alongside the government to create awareness. The goal is a truly inclusive digital ecosystem where no citizen is left behind in the journey of progress.",
+                "Climate change is no longer a distant threat; it is a reality that is affecting weather patterns, agriculture, and biodiversity across the globe. India, being a tropical country with a vast coastline, is particularly vulnerable to the impacts of global warming. The frequency of extreme weather events, such as cyclones, floods, and heatwaves, has increased alarmingly in recent years. To combat this, the country has set ambitious targets under the Paris Agreement. The goal to achieve net-zero carbon emissions by 2070 is a testament to India's commitment to the planet. Renewable energy is at the forefront of this battle. The expansion of solar parks and wind energy farms is reducing the dependency on fossil fuels. The concept of 'LiFE' (Lifestyle for Environment) introduced by the Prime Minister encourages individuals to adopt eco-friendly habits. It emphasizes that the fight against climate change is not just the responsibility of the government but also of the citizens. Simple measures like reducing single-use plastic, conserving water, and using public transport can make a massive difference. Conservation of forests and wildlife is equally important. Project Tiger and Project Elephant have shown success in increasing the population of endangered species. However, urbanization poses a threat to natural habitats. Sustainable development requires a balance where economic growth does not come at the cost of ecological destruction. The preservation of wetlands and mangroves is vital as they act as natural buffers against natural disasters. Beyond individual action, large-scale industrial shifts towards green hydrogen and circular economy models are necessary. India is positioned to become a global leader in green energy manufacturing, with several incentives for companies venturing into solar panel production and lithium-ion battery technology. The transition to electric vehicles (EVs) is also picking up pace, supported by the FAME scheme. Urban planning must integrate green spaces and efficient drainage systems to handle the increased rainfall predicted by climate models.",
+                "Public administration in India has evolved significantly since independence. The introduction of e-governance has streamlined many administrative processes, making them more transparent and efficient. Citizen Charters have been introduced in various departments to ensure timely delivery of services. The Right to Information Act has further empowered citizens by providing them with access to information held by public authorities. These reforms are essential for good governance and inclusive growth in a democratic society. However, there is still a long way to go in terms of improving the quality of services at the grass-roots level. Capacity building of civil servants and leveraging technology for better service delivery are the keys to future administrative reforms. Accountability and transparency remain the cornerstones of a modern public administration system. The use of Direct Benefit Transfer (DBT) has significantly reduced leakages in welfare schemes, ensuring that the benefits reach the intended beneficiaries. Digital service delivery platforms, like Umang and Digilocker, are providing citizens with easy access to government services. The government is also focusing on administrative simplification by reducing the number of forms and procedures required for various approvals.",
+                "Urbanization is an inevitable consequence of economic growth. As per recent census data, nearly 34% of India's population lives in urban areas, and this number is expected to rise to 40% by 2030. To manage this rapid urban sprawl, the government launched the Smart Cities Mission. The objective is to promote cities that provide core infrastructure and give a decent quality of life to their citizens through the application of 'Smart' solutions. Core infrastructure elements include adequate water supply, assured electricity supply, sanitation, including solid waste management, and efficient urban mobility. The development of Metro Rail networks in Tier-1 and Tier-2 cities has significantly eased traffic congestion. Cities like Indore and Surat have set benchmarks in cleanliness under the Swachh Bharat Abhiyan. However, challenges such as air pollution and water scarcity persist. The Air Quality Index (AQI) in major cities often reaches severe levels during winter, necessitating strict control measures on vehicular emissions and construction dust. Affordable housing is another critical area; the Pradhan Mantri Awas Yojana (Urban) aims to provide 'Housing for All'. Integrating technology for better governance, such as using command and control centers for traffic and safety, is making cities safer. The future of urbanization relies on building resilient infrastructure that can withstand the pressures of population density and climate change.",
+                "India is a land of diverse cultures, languages, and traditions, often described as a subcontinent with a civilization spanning over 5,000 years. From the snow-capped Himalayas in the north to the serene backwaters of Kerala in the south, the country offers a plethora of experiences for travelers. The tourism sector is a major contributor to the economy and a significant generator of employment. UNESCO World Heritage Sites like the Taj Mahal, Hampi, and the Ajanta-Ellora caves attract millions of international and domestic tourists annually. The government’s 'Dekho Apna Desh' initiative encourages citizens to explore the hidden gems within the country. Cultural tourism extends beyond monuments to include festivals, cuisine, and arts. The vibrancy of festivals like Diwali, Holi, and Eid reflects the secular fabric of the nation. Indian classical music and dance forms like Bharatanatyam and Kathak continue to enthrall audiences worldwide. Recently, there has been a surge in spiritual and wellness tourism, with people flocking to centers of Yoga and Ayurveda. Improving connectivity through the UDAN scheme has made air travel accessible to smaller towns, boosting regional tourism. However, sustainable tourism is the need of the hour. Preserving the sanctity of heritage sites and maintaining cleanliness is essential to ensure that India remains a top global destination. The hospitality industry must adopt eco-friendly practices to minimize its carbon footprint while offering world-class services.",
+                "The Indian space program has achieved remarkable milestones, making India a prominent player in global space research. The Indian Space Research Organisation has successfully launched several missions, including Chandrayaan and Mangalyaan, showcasing its cost-effective and advanced technology. The focus is on using space technology for socio-economic development, such as tele-education, telemedicine, and natural resource management. The recent launch of the Gaganyaan mission aims to send Indian astronauts into space, marking a new era in human spaceflight. Collaboration with international space agencies and the participation of the private sector are being encouraged to further boost the space ecosystem. India's expertise in satellite launches and remote sensing continues to provide vital data for various applications, ranging from agriculture to disaster management. The development of the Small Satellite Launch Vehicle (SSLV) caters to the growing global demand for commercial satellite launches.",
+                "The agricultural sector continues to be the backbone of the Indian economy, providing employment to a large section of the population. To improve farmer income, the government has introduced several schemes such as PM-Kisan and Pradhan Mantri Fasal Bima Yojana. The focus is on increasing productivity through sustainable farming practices and better irrigation facilities. Promoting organic farming and diversifying into high-value crops are also being encouraged. Technology is playing a vital role in transforming agriculture with the use of drones and mobile apps for weather forecasting and market prices. Strengthening the food processing sector and improving rural infrastructure are essential for reducing post-harvest losses and ensuring better returns for farmers. Agriculture remains a critical area for achieving food security and sustainable development goals.",
+                "The Make in India initiative was launched to encourage companies to manufacture their products in India and incentivize with dedicated investments into manufacturing. This initiative aims to transform India into a global manufacturing hub. It focuses on 25 sectors of the economy for job creation and skill enhancement. The government has taken various measures to improve ease of doing business, including simplification of procedures and digitalization of approvals. Foreign Direct Investment policy has been liberalized in several sectors to attract global capital. The Production Linked Incentive scheme has further boosted manufacturing in key sectors like electronics, pharmaceuticals, and automobiles. By strengthening the manufacturing sector, India aims to increase its share in the global value chain and create millions of employment opportunities for its growing youth population.",
+                "Education is the bedrock of a nation's progress. The introduction of the National Education Policy (NEP) 2020 marked a paradigm shift in the Indian education system, aiming to replace the 34-year-old policy of 1986. The NEP proposes a 5+3+3+4 curricular structure, replacing the traditional 10+2 system. This new structure focuses on the cognitive and developmental stages of children. A key highlight is the emphasis on vocational training starting from Class 6, which aims to equip students with practical skills alongside theoretical knowledge. The policy also advocates for the use of the mother tongue or regional language as the medium of instruction up to Grade 5, ensuring better conceptual understanding. Higher education is also undergoing a transformation with the introduction of a multiple entry and exit system.",
+                "The Goods and Services Tax was introduced in India as a historic tax reform to create a unified national market. It replaced a complex web of multiple indirect taxes with a single tax, simplifying the tax structure for businesses. GST aims to reduce the cascading effect of taxes and lower the overall tax burden on consumers. The GST Council, comprising representatives from the center and states, plays a crucial role in decision-making and resolving issues. While the initial implementation faced challenges, the system has stabilized over time with improved compliance and revenue collection. Digitalization of the tax process through the GST portal has increased transparency and reduced physical interface. GST has not only improved ease of doing business but also contributed to a more formalized and integrated Indian economy."
+            ],
+            CHSL: [
+                "The Constitution of India is the supreme law of the land. It provides the framework for the political principles, procedures, and powers of the government. It was adopted by the Constituent Assembly on 26th November 1949 and came into effect on 26th January 1950. The Constitution provides for a federal structure with a unitary tilt. It establishes a parliamentary system of government at both the central and state levels. The fundamental rights guaranteed are essential for the holistic development of every citizen. These rights are protected by the highest court of the land and ensure that every individual is treated with dignity and equality. The Constitution also outlines the directive principles of state policy, which provide a roadmap for social and economic justice. Amendments to the Constitution allow it to evolve with the changing needs of the nation. The Preamble to the Constitution reflects the core values of justice, liberty, equality, and fraternity. The separation of powers between the executive, legislature, and judiciary ensures a system of checks and balances.",
+                "Healthy lifestyle habits are fundamental to overall well-being and productivity. Regular physical exercise, a balanced diet, and adequate sleep are essential for maintaining good health. Avoiding harmful habits like smoking and excessive consumption of processed foods can significantly reduce the risk of chronic diseases. Mental health is equally important and requires attention through stress management and mindfulness practices. The government has launched various initiatives like the Fit India Movement to promote a culture of fitness and health. Access to quality healthcare facilities and promoting awareness about preventive measures are key to building a healthy nation. Community participation in health programs and adopting hygienic practices in daily life contribute to a better quality of life for everyone.",
+                "Forests are vital for maintaining the balance of our environment. They provide habitat for millions of species and act as carbon sinks to mitigate climate change. Afforestation and preventing illegal logging are important for biodiversity conservation. Many communities depend on forests for their livelihoods. Sustainable forest management ensures that we can use forest products without damaging the ecosystem. Protecting our green cover is essential for a healthy planet and future security. Forests also help in regulating the water cycle and preventing soil erosion. We must value and protect our forests for the well-being of all living beings. Let us work together to increase our green cover for a sustainable future.",
+                "Social media has transformed the way people communicate and access information in the modern world. It provides a platform for sharing ideas, connecting with others, and raising awareness about important issues. While social media offers many benefits, it also poses challenges such as the spread of misinformation and concerns about online privacy. Digital literacy is essential for navigating the online space safely and responsibly. It is important to verify information from reliable sources and be mindful of the impact of one's online actions. The government and tech companies are working together to address issues like cyberbullying and data protection.",
+                "The importance of sports in building character and national pride is widely recognized. Participation in sports fosters teamwork, discipline, and resilience among individuals. India has seen a growing interest in various sports beyond cricket, with athletes excelling in international events like the Olympics and Asian Games. The government has introduced schemes like Khelo India to identify and support young sporting talent from across the country. Better sports infrastructure and training facilities are being developed to nurture athletes at all levels. Sports also promote physical fitness and a healthy lifestyle among people. Success in sports brings glory to the nation and inspires the youth.",
+                "The role of science and technology in improving daily life and solving global problems is immense. From healthcare and communication to energy and space exploration, scientific advancements have transformed society. Research and development are essential for innovation and discovering new solutions to complex challenges. Promoting scientific temper among students is vital for nurturing future scientists. The government supports various research institutions and projects to boost the scientific ecosystem in the country. Collaboration between academia, industry, and the government is key to driving technological progress. Science also helps us understand the natural world.",
+                "The banking sector plays a pivotal role in the economic development and financial stability of a nation. It provides essential services such as savings, credit, and payment systems to individuals and businesses. The introduction of digital banking and mobile payment apps has revolutionized the way financial transactions are conducted. Financial inclusion aims to provide access to banking services to the unbanked and under-served sections of society. The government and the central bank have taken various measures to strengthen the banking system and ensure its resilience. Improving customer service and protecting user data are key priorities.",
+                "Sustainable development is defined as development that meets the needs of the present without compromising the ability of future generations. The United Nations has outlined seventeen Sustainable Development Goals to be achieved by 2030. These goals address global challenges related to poverty and inequality. India is committed to achieving these goals through national programs. Green energy and waste reduction are key pillars of this transformative agenda. Promoting inclusive growth that benefits all sections of society is a major objective. Community participation and awareness are essential for the success of sustainability initiatives.",
+                "Yoga is an ancient physical, mental and spiritual practice that originated in India. The word yoga derives from Sanskrit and means to join or to unite, symbolizing the union of body and consciousness. Today it is practiced in various forms around the world and continues to grow in popularity. Recognizing its universal appeal, the United Nations proclaimed 21 June as the International Day of Yoga. Regular practice of yoga promotes physical health and mental peace. It helps in reducing stress and improving flexibility and strength. Yoga is for everyone, regardless of age or fitness level.",
+                "Reading is a wonderful habit that opens up a world of knowledge and imagination for people of all ages. Libraries provide access to a wide variety of books, magazines, and newspapers. Reading helps in improving language skills, vocabulary, and critical thinking. It also provides a way to learn about different cultures and history. Spending some time every day reading can be both educational and relaxing. Encouraging children to read from a young age helps in their overall development. Libraries are valuable community resources that promote literacy and lifelong learning."
+            ],
+            MTS: [
+                "Discipline is the key to success in any field of life. It involves following a set of rules and maintaining a sense of order in our daily activities. Discipline helps in building character, focus, and resilience. In school, it helps students to study better and achieve their goals. In professional life, it leads to better productivity and growth. Being punctual and organized are important aspects of a disciplined life. Small acts of self-control lead to bigger achievements over time. Discipline is not about restriction but about creating a structure that allows us to reach our full potential.",
+                "Cleanliness is next to godliness, and the Swachh Bharat Mission has been a major step towards making India clean. Maintaining personal hygiene and keeping our surroundings clean are essential for preventing diseases. Proper waste management and reducing the use of plastic are key aspects of this campaign. Every citizen has a responsibility to contribute to a clean and healthy environment. Community participation in cleanliness drives helps in building a better society. Awareness about the importance of sanitation is vital for its success. Small efforts like using dustbins can make a big impact.",
+                "Digital payments have become increasingly popular in India, making financial transactions more convenient and secure. The introduction of apps like UPI has revolutionized the way people pay for goods and services. Digital payments promote transparency and help in reducing the dependence on cash. They also contribute to the growth of the digital economy and financial inclusion. It is important to be aware of online security and protect our financial information while making digital transactions. The government and banks are working together to improve the digital payment infrastructure.",
+                "Healthy eating habits are essential for maintaining good health and energy levels throughout the day. A balanced diet should include a variety of fruits, vegetables, grains, and proteins. Drinking plenty of water and avoiding excessive sugar and processed foods are also important. Good nutrition helps in building a strong immune system and reducing the risk of diseases. It is better to have home-cooked meals whenever possible as they are often healthier. Eating at regular intervals and not skipping breakfast are healthy practices. Small changes in our diet lead to big improvements.",
+                "Road safety is a major concern that affects everyone who uses the road. Following traffic rules and being mindful of other road users can prevent many accidents. Wearing helmets and seatbelts is essential for safety. Over-speeding and driving under the influence of alcohol should be avoided at all costs. Pedestrians should use designated crossings and be careful while crossing the road. Public awareness about road safety rules is vital for reducing road accidents. The government and traffic police are taking various measures to improve road safety and enforce rules.",
+                "Science is all around us and plays a vital role in our daily lives. From the electricity that powers our homes to the medicines that heal us, scientific discoveries have made our lives easier. Understanding basic scientific principles helps us make sense of the natural world. Science encourages curiosity and the habit of asking questions to find answers. Modern technology, which is based on science, has transformed the way we communicate and travel. Even simple activities like cooking involves scientific processes. Promoting scientific awareness and curiosity among children.",
+                "Honesty is the best policy, a simple yet profound truth that forms the basis of strong character and integrity. Being honest means being truthful in our words and actions, and being sincere in our dealings with others. It builds trust and respect in relationships and contributes to a transparent and ethical society. While it may be challenging at times, honesty leads to long-term peace of mind and self-respect. Encouraging honesty in children from a young age helps in building a foundation of moral values for their future.",
+                "Unity in diversity is a unique feature of Indian society, where people of different religions, languages, and cultures coexist harmoniously. This diversity is a source of strength and cultural richness that reflects the spirit of pluralism. Celebrating festivals of all religions and respecting different traditions fosters a sense of national unity and brotherhood. Education plays a key role in promoting tolerance and mutual understanding among diverse communities. The strength of our democracy lies in our ability to embrace diversity and work together for the progress of the nation.",
+                "Punctuality is a virtue that reflects respect for time and consideration for others. Being on time for appointments, meetings, and classes shows a sense of responsibility and discipline. It helps in managing our tasks efficiently and reducing stress in our daily lives. In professional life, punctuality is highly valued and contributes to reliability and success. Developing the habit of being punctual from a young age is essential for personal and professional growth. Respecting others' time is as important as respecting our own.",
+                "Kindness is a simple act of compassion and empathy that can make a massive difference in someone's life. Helping those in need, being polite, and showing respect to everyone are acts of kindness that contribute to a more humane and caring society. It does not always require large gestures; even a smile or a kind word can brighten someone's day. Promoting kindness in schools and communities helps in building an environment of mutual support and friendship. Small acts of kindness ripple out to create a more positive world."
+            ]
+        };
+
+        const app = {
+            state: { view: 'home', duration: 600, activeCategory: null, selectedPassage: null, input: '', timeLeft: 600, isTesting: false, timer: null, menuOpen: false },
+
+            init() { 
+                this.render(); 
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.relative')) {
+                        this.state.menuOpen = false;
+                        document.getElementById('dropdown-menu')?.classList.add('hidden');
+                    }
+                });
+            },
+            toggleMenu() {
+                this.state.menuOpen = !this.state.menuOpen;
+                const menu = document.getElementById('dropdown-menu');
+                if (this.state.menuOpen) menu.classList.remove('hidden');
+                else menu.classList.add('hidden');
+            },
+            setView(v) { 
+                this.resetTimer();
+                this.state.view = v; 
+                this.state.menuOpen = false;
+                document.getElementById('dropdown-menu')?.classList.add('hidden');
+                this.render(); 
+                window.scrollTo(0,0); 
+            },
+            showHome() { this.setView('home'); },
+            resetTimer() { 
+                if (this.state.timer) clearInterval(this.state.timer); 
+                this.state.timer = null; 
+                this.state.isTesting = false; 
+            },
+            openConfig(cat) {
+                this.state.activeCategory = cat;
+                document.getElementById('modal-title').innerText = `${cat} Practice Settings`;
+                document.getElementById('config-modal').classList.remove('hidden');
+            },
+            closeModal() { document.getElementById('config-modal').classList.add('hidden'); },
+            setDuration(s, btn) {
+                this.state.duration = s; this.state.timeLeft = s;
+                document.querySelectorAll('.duration-btn').forEach(el => el.className = "duration-btn py-4 rounded-2xl border border-slate-100 font-black text-slate-400 hover:border-blue-500 transition-all text-[10px] uppercase");
+                btn.className = "duration-btn py-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-black text-[10px] uppercase";
+            },
+            startTest() {
+                this.closeModal(); this.resetTimer();
+                const pool = PASSAGE_POOLS[this.state.activeCategory];
+                this.state.selectedPassage = pool[Math.floor(Math.random() * pool.length)];
+                this.state.view = 'test'; this.state.input = ''; this.state.timeLeft = this.state.duration; this.render();
+                setTimeout(() => { 
+                    const ta = document.getElementById('typing-area'); 
+                    if (ta) { ta.value = ''; ta.focus(); }
+                    const tp = document.getElementById('typing-preview');
+                    if (tp) tp.scrollTop = 0;
+                }, 100);
+            },
+            restartTest() { this.startTest(); },
+            handleInput(e) {
+                if (!this.state.isTesting && e.target.value.length > 0) {
+                    this.state.isTesting = true;
+                    this.state.timer = setInterval(() => { 
+                        this.state.timeLeft--; 
+                        if (this.state.timeLeft <= 0) this.finishTest(); 
+                        this.updateUI(); 
+                    }, 1000);
+                }
+                const val = e.target.value;
+                if (val.length <= this.state.selectedPassage.length) {
+                    this.state.input = val; this.renderPreview(); this.updateUI();
+                    if (val.length === this.state.selectedPassage.length) this.finishTest();
+                }
+            },
+            calculate() {
+                const text = this.state.selectedPassage;
+                const typed = this.state.input;
+                const mins = (this.state.duration - this.state.timeLeft) / 60 || 0.01;
+                let mistakes = 0;
+                for (let i = 0; i < typed.length; i++) { if (typed[i] !== text[i]) mistakes++; }
+                const gwpm = Math.round((typed.length / 5) / mins);
+                const nwpm = Math.max(0, Math.round(((typed.length - (mistakes * 5)) / 5) / mins));
+                const acc = typed.length > 0 ? Math.round(((typed.length - mistakes) / typed.length) * 100) : 100;
+                return { gwpm, nwpm, acc, mistakes, keys: typed.length };
+            },
+            updateUI() {
+                const res = this.calculate();
+                const mm = Math.floor(this.state.timeLeft / 60), ss = this.state.timeLeft % 60;
+                const timeStr = `${mm}:${ss < 10 ? '0' : ''}${ss}`;
+                if (document.getElementById('ui-timer-header')) document.getElementById('ui-timer-header').innerText = timeStr;
+                if (document.getElementById('ui-timer-para')) document.getElementById('ui-timer-para').innerText = timeStr;
+                if (document.getElementById('ui-net')) document.getElementById('ui-net').innerText = res.nwpm;
+                if (document.getElementById('ui-gross')) document.getElementById('ui-gross').innerText = res.gwpm;
+                if (document.getElementById('ui-keys')) document.getElementById('ui-keys').innerText = res.keys;
+            },
+            finishTest() { this.resetTimer(); this.state.view = 'results'; this.render(); },
+            renderPreview() {
+                const container = document.getElementById('typing-preview');
+                if (!container) return;
+                const text = this.state.selectedPassage;
+                const input = this.state.input;
+                let html = '';
+                for (let i = 0; i < text.length; i++) {
+                    let cls = i < input.length ? (input[i] === text[i] ? 'char-correct' : 'char-incorrect') : (i === input.length ? 'char-current' : 'char-pending');
+                    html += `<span class="${cls}">${text[i]}</span>`;
+                }
+                container.innerHTML = html;
+                const cur = container.querySelector('.char-current');
+                if (cur) {
+                    const charOffsetTop = cur.offsetTop;
+                    const baseFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+                    const lineHeightPx = 2.2 * 1.5 * baseFontSize; 
+                    if (charOffsetTop > lineHeightPx * 2) container.scrollTop = charOffsetTop - lineHeightPx;
+                    else container.scrollTop = 0;
+                }
+            },
+            render() {
+                const main = document.getElementById('app-view');
+                if (this.state.view === 'home') {
+                    main.innerHTML = `
+                        <div class="max-w-6xl mx-auto px-6 py-20 animate-fade">
+                            <div class="text-center mb-20">
+                                <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter text-slate-900 uppercase">SSCTyping<span class="text-blue-600">Pro</span></h1>
+                                <p class="text-slate-500 font-bold text-[11px] uppercase tracking-[0.4em] mb-12">Premier Preparation Hub for Government Exams</p>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                                ${['CGL', 'CHSL', 'MTS'].map(cat => `
+                                    <div class="practice-card group" onclick="app.openConfig('${cat}')">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[9px] font-black uppercase text-blue-600 tracking-widest bg-blue-50 px-3 py-1 rounded-lg">Official Mode</span>
+                                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]"></div>
+                                        </div>
+                                        <div class="py-8">
+                                            <h3 class="text-5xl font-black text-slate-900 tracking-tighter uppercase group-hover:text-blue-600 transition-colors">${cat}</h3>
+                                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-3">High-Standard Passage Pool</p>
+                                        </div>
+                                        <button class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-[1.5rem] shadow-xl uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-95 transition-all">Launch Exercise</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'test') {
+                    const mm = Math.floor(this.state.timeLeft / 60), ss = this.state.timeLeft % 60;
+                    main.innerHTML = `
+                        <div class="max-w-6xl mx-auto px-6 py-10 animate-fade">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                                <div class="bg-white p-6 rounded-[2rem] text-center border border-slate-100 shadow-sm">
+                                    <p class="text-[9px] text-slate-400 font-black uppercase mb-2 tracking-widest">Remaining</p>
+                                    <p id="ui-timer-header" class="text-4xl font-mono-typing text-blue-600 font-black">${mm}:${ss < 10 ? '0' : ''}${ss}</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-[2rem] text-center border border-slate-100 shadow-sm">
+                                    <p class="text-[9px] text-slate-400 font-black uppercase mb-2 tracking-widest">Net WPM</p>
+                                    <p id="ui-net" class="text-4xl font-mono-typing text-emerald-600 font-black">0</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-[2rem] text-center border border-slate-100 shadow-sm">
+                                    <p class="text-[9px] text-slate-400 font-black uppercase mb-2 tracking-widest">Gross WPM</p>
+                                    <p id="ui-gross" class="text-4xl font-mono-typing text-slate-400 font-black">0</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-[2rem] text-center border border-slate-100 shadow-sm">
+                                    <p class="text-[9px] text-slate-400 font-black uppercase mb-2 tracking-widest">Keystrokes</p>
+                                    <p id="ui-keys" class="text-4xl font-mono-typing text-slate-800 font-black">0</p>
+                                </div>
+                            </div>
+
+                            <div id="typing-preview-container" class="mb-8 shadow-2xl">
+                                <div class="px-10 py-4 bg-slate-900 flex justify-between items-center text-white border-b border-slate-800">
+                                    <div class="flex items-center gap-4">
+                                        <span class="text-[10px] font-black uppercase text-slate-500 tracking-widest">TEST CLOCK:</span>
+                                        <span id="ui-timer-para" class="text-2xl font-mono-typing font-black text-blue-400">${mm}:${ss < 10 ? '0' : ''}${ss}</span>
+                                    </div>
+                                    <span class="text-[10px] font-black uppercase opacity-60 tracking-widest">${this.state.activeCategory} OFFICIAL SIMULATION</span>
+                                </div>
+                                <div id="typing-preview" class="font-mono-typing no-scrollbar"></div>
+                            </div>
+
+                            <div id="typing-area-wrapper">
+                                <textarea id="typing-area" oninput="app.handleInput(event)" class="font-mono-typing no-scrollbar" placeholder="Proceed with precision..." spellcheck="false"></textarea>
+                            </div>
+
+                            <div class="mt-10 flex flex-col md:flex-row justify-between items-center px-6 gap-6">
+                                <span class="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">5-STROKE DEPRESSION RULE IN EFFECT</span>
+                                <div class="flex gap-8">
+                                    <button onclick="app.restartTest()" class="text-[11px] font-black text-blue-600 hover:text-blue-800 transition uppercase tracking-widest flex items-center gap-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                        Restart
+                                    </button>
+                                    <button onclick="app.showHome()" class="text-[11px] font-black text-red-500 hover:text-red-700 transition uppercase tracking-widest">Abandon</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    this.renderPreview();
+                } else if (this.state.view === 'results') {
+                    const r = this.calculate();
+                    main.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-6 py-20 animate-fade">
+                            <div class="bg-white rounded-[4rem] shadow-2xl overflow-hidden text-center border border-slate-50">
+                                <div class="bg-slate-900 py-16 text-white">
+                                    <h2 class="text-5xl font-black mb-2 uppercase tracking-tighter">${this.state.activeCategory} Scorecard</h2>
+                                    <p class="text-slate-400 font-black text-[10px] uppercase tracking-[0.4em]">Official Performance Metrics</p>
+                                </div>
+                                <div class="p-16">
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+                                        <div class="p-8 bg-blue-50 rounded-[2.5rem]"><p class="text-[10px] font-black text-blue-500 mb-4 tracking-widest uppercase">Net WPM</p><p class="text-6xl font-black text-blue-700">${r.nwpm}</p></div>
+                                        <div class="p-8 bg-emerald-50 rounded-[2.5rem]"><p class="text-[10px] font-black text-emerald-500 mb-4 tracking-widest uppercase">Accuracy</p><p class="text-6xl font-black text-emerald-700">${r.acc}%</p></div>
+                                        <div class="p-8 bg-red-50 rounded-[2.5rem]"><p class="text-[10px] font-black text-red-500 mb-4 tracking-widest uppercase">Errors</p><p class="text-6xl font-black text-red-700">${Math.round(r.mistakes / 5)}</p></div>
+                                        <div class="p-8 bg-slate-100 rounded-[2.5rem]"><p class="text-[10px] font-black text-slate-500 mb-4 tracking-widest uppercase">Keys</p><p class="text-6xl font-black text-slate-900">${r.keys}</p></div>
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row gap-6">
+                                        <button onclick="app.showHome()" class="flex-1 btn-black text-white font-black py-7 rounded-[2rem] shadow-2xl uppercase tracking-widest text-[12px] hover:scale-105 active:scale-95 transition-all">Main Dashboard</button>
+                                        <button onclick="app.startTest()" class="flex-1 bg-blue-600 text-white font-black py-7 rounded-[2rem] shadow-2xl uppercase tracking-widest text-[12px] hover:bg-blue-700 active:scale-95 transition-all">Retake Exercise</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'about') {
+                    main.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-6 py-20 animate-fade">
+                            <h2 class="text-5xl font-black text-slate-900 mb-12 uppercase tracking-tighter">About SSCTypingPro</h2>
+                            <div class="prose prose-slate max-w-none space-y-12">
+                                <section class="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-sm">
+                                    <h3 class="text-2xl font-black text-slate-900 uppercase mb-6">Mission Critical Preparation</h3>
+                                    <p class="text-slate-600 leading-relaxed font-medium">SSCTypingPro is engineered specifically for aspirants of the Staff Selection Commission exams. Unlike generic typing tutors, we strictly adhere to the 5-stroke depression rule used in actual government evaluations.</p>
+                                </section>
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'contact') {
+                    main.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-6 py-20 animate-fade">
+                            <h2 class="text-5xl font-black text-slate-900 mb-4 uppercase tracking-tighter text-center">Get in Touch</h2>
+                            <p class="text-center text-slate-400 font-bold text-xs uppercase tracking-widest mb-16">Dedicated Technical Support for Aspirants</p>
+                            <div class="bg-white p-16 rounded-[4rem] border border-slate-100 shadow-2xl max-w-2xl mx-auto text-center">
+                                <div class="grid grid-cols-1 gap-8">
+                                    <div class="p-10 bg-blue-50 rounded-[2rem] border border-blue-100">
+                                        <p class="text-[11px] font-black text-blue-500 uppercase tracking-widest mb-3">Email Support</p>
+                                        <p class="text-2xl font-black text-slate-900">support@ssctypingpro.com</p>
+                                    </div>
+                                    <div class="p-10 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                        <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">Office Hours</p>
+                                        <p class="text-2xl font-black text-slate-900">10:00 AM - 06:00 PM IST</p>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-12 uppercase font-black tracking-[0.4em]">Response within 24 Hours</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'privacy') {
+                    main.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-6 py-20 animate-fade">
+                            <h2 class="text-5xl font-black text-slate-900 mb-12 uppercase tracking-tighter">Privacy Commitment</h2>
+                            <div class="bg-white p-16 rounded-[3rem] border border-slate-100 shadow-sm text-slate-600 leading-relaxed font-medium">
+                                <p class="font-black text-slate-900 mb-8 uppercase tracking-[0.3em] text-[10px]">Data Integrity Statement</p>
+                                <p class="mb-8">Your privacy is absolute. SSCTypingPro operates locally. We do not store, transmit, or monetize your typing data or personal metrics.</p>
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'terms') {
+                    main.innerHTML = `
+                        <div class="max-w-4xl mx-auto px-6 py-20 animate-fade">
+                            <h2 class="text-5xl font-black text-slate-900 mb-12 uppercase tracking-tighter">Terms of Service</h2>
+                            <div class="bg-white p-16 rounded-[3rem] border border-slate-100 shadow-sm text-slate-600 leading-relaxed font-medium">
+                                <p class="mb-8 uppercase font-black tracking-widest text-[11px] text-slate-900">Usage Agreement</p>
+                                <p class="mb-8">By accessing SSCTypingPro, you acknowledge that this tool is provided for educational and practice purposes only.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+        app.init();
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
