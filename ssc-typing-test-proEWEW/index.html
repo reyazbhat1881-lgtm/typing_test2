@@ -1,0 +1,311 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSC Typing Pro - Official Skill Test Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
+        .font-mono-typing { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Typing Highlights */
+        .char-correct { color: #1e293b; background: transparent; }
+        .char-incorrect { color: #ffffff; background: #dc2626; border-radius: 2px; }
+        .char-current { 
+            color: #1e40af; 
+            background: #dbeafe; 
+            border-radius: 2px; 
+            box-shadow: 0 0 0 2px #3b82f6; 
+            position: relative;
+            display: inline-block;
+        }
+        .char-pending { color: #94a3b8; }
+        
+        /* Auto-sliding passage viewport */
+        #typing-preview {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 2.2;
+            height: 240px; 
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #config-modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+
+        .btn-black { 
+            background-color: #0f172a; 
+            color: white; 
+            transition: all 0.2s; 
+        }
+        .btn-black:hover { background-color: #1e293b; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="app.showHome()">
+                <div class="bg-blue-600 p-1.5 rounded-lg shadow-md">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <span class="text-xl font-extrabold tracking-tighter text-slate-900">SSC<span class="text-blue-600">TypingPro</span></span>
+            </div>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-500">
+                <a href="javascript:void(0)" onclick="app.showHome()" class="hover:text-blue-600 transition">Dashboard</a>
+                <a href="javascript:void(0)" onclick="app.setView('about')" class="hover:text-blue-600 transition">Exam Pattern</a>
+                <a href="javascript:void(0)" onclick="app.setView('contact')" class="hover:text-blue-600 transition">Contact</a>
+            </nav>
+            <button class="md:hidden p-2 text-slate-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN VIEW -->
+    <main id="app-view" class="flex-grow"></main>
+
+    <!-- FOOTER -->
+    <footer class="bg-[#0f172a] text-slate-400 py-16 mt-auto">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+                <div>
+                    <h3 class="text-white font-bold mb-6">SSC Typing Test Pro</h3>
+                    <p class="text-xs leading-relaxed max-w-sm">
+                        Providing high-quality, free typing practice tools for government job aspirants. Not affiliated with the Staff Selection Commission.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold mb-6">Legal</h3>
+                    <ul class="text-xs space-y-4">
+                        <li><a href="javascript:void(0)" onclick="app.setView('privacy')" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="javascript:void(0)" onclick="app.setView('contact')" class="hover:text-white transition">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold mb-6">Exam Info</h3>
+                    <p class="text-xs leading-relaxed">
+                        Supports CGL (DEST), CHSL (LDC/DEO), and MTS typing standards.
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">© 2024 • Practice Portal for Aspirants</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- CONFIG MODAL -->
+    <div id="config-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-fade">
+            <h3 class="text-2xl font-black text-slate-900 mb-2">Set Test Duration</h3>
+            <p class="text-slate-500 text-sm mb-8">Choose timing before you begin practice.</p>
+            <div class="grid grid-cols-2 gap-3 mb-8">
+                <button onclick="app.setDuration(120, this)" class="duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all">2 Minutes</button>
+                <button onclick="app.setDuration(300, this)" class="duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all">5 Minutes</button>
+                <button onclick="app.setDuration(600, this)" class="duration-btn py-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-bold">10 Minutes</button>
+                <button onclick="app.setDuration(900, this)" class="duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all">15 Minutes</button>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="app.closeModal()" class="flex-1 py-4 text-slate-400 font-bold">Cancel</button>
+                <button onclick="app.startTest()" class="flex-[2] py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg">BEGIN TEST</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PASSAGES = [
+            { id: 'p1', cat: 'CGL EXAM', lang: 'English', title: 'SSC CGL: Digital Transformation in India', text: `The Digital India initiative was launched with a vision to transform India into a digitally empowered society and a knowledge economy. This flagship program of the Government of India aims to provide a fillip to the electronics manufacturing sector in the country. The initiative includes plans to connect rural areas with high-speed internet networks. Digital India has three core components: the creation of digital infrastructure, delivering services digitally and digital literacy. It seeks to ensure that government services are available to citizens electronically. The program also focuses on bridging the digital divide between the urban and rural population by providing various digital facilities.` },
+            { id: 'p2', cat: 'CHSL EXAM', lang: 'English', title: 'SSC CHSL: Indian Constitutional Framework', text: `The Constitution of India is the supreme law of the land. It provides the framework for the political principles, procedures, and powers of the government. It was adopted by the Constituent Assembly on 26th November 1949 and came into effect on 26th January 1950. The Constitution provides for a federal structure with a unitary tilt. It establishes a parliamentary system of government at both the central and state levels. The fundamental rights guaranteed by the Constitution are essential for the holistic development of every citizen.` },
+            { id: 'p3', cat: 'MTS EXAM', lang: 'English', title: 'SSC MTS: Environmental Policy', text: `Sustainable development is defined as development that meets the needs of the present without compromising the ability of future generations to meet their own needs. The United Nations has outlined seventeen Sustainable Development Goals to be achieved by 2030. These goals address global challenges related to poverty, inequality, climate change, environmental degradation, peace, and justice. India is committed to achieving these goals through various national programs and policies.` },
+            { id: 'p4', cat: 'CGL EXAM', lang: 'Hindi', title: 'SSC CGL: डिजिटल इंडिया और समाज', text: `डिजिटल इंडिया पहल की शुरुआत भारत को डिजिटल रूप से सशक्त समाज और ज्ञान अर्थव्यवस्था में बदलने के दृष्टिकोण के साथ की गई थी। भारत सरकार के इस प्रमुख कार्यक्रम का उद्देश्य देश में इलेक्ट्रॉनिक्स विनिर्माण क्षेत्र को बढ़ावा देना है। इस पहल में ग्रामीण क्षेत्रों को उच्च गति वाले इंटरनेट नेटवर्क से जोड़ने की योजना शामिल है। डिजिटल इंडिया के तीन मुख्य घटक हैं: डिजिटल बुनियादी ढांचे का निर्माण, डिजिटल रूप से सेवाएं प्रदान करना और डिजिटल साक्षरता।` }
+        ];
+
+        const app = {
+            state: { view: 'home', lang: 'English', duration: 600, selectedPassage: null, input: '', timeLeft: 600, isTesting: false, timer: null },
+
+            init() { this.showHome(); },
+            setView(v) { this.state.view = v; this.render(); window.scrollTo(0,0); },
+            showHome() { this.state.view = 'home'; if (this.state.timer) clearInterval(this.state.timer); this.state.isTesting = false; this.state.input = ''; this.render(); },
+            openConfig(id) {
+                this.state.selectedPassage = id === 'random' ? PASSAGES.filter(p => p.lang === this.state.lang)[Math.floor(Math.random() * 3)] : PASSAGES.find(p => p.id === id);
+                document.getElementById('config-modal').classList.remove('hidden');
+            },
+            closeModal() { document.getElementById('config-modal').classList.add('hidden'); },
+            setDuration(s, btn) {
+                this.state.duration = s; this.state.timeLeft = s;
+                document.querySelectorAll('.duration-btn').forEach(el => el.className = "duration-btn py-4 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:border-blue-500 transition-all");
+                btn.className = "duration-btn py-4 rounded-2xl border-2 border-blue-500 bg-blue-50 text-blue-600 font-bold";
+            },
+            startTest() {
+                this.closeModal(); this.state.view = 'test'; this.state.input = ''; this.state.timeLeft = this.state.duration; this.render();
+                setTimeout(() => { const ta = document.getElementById('typing-area'); if (ta) ta.focus(); }, 100);
+            },
+            handleInput(e) {
+                if (!this.state.isTesting && e.target.value.length > 0) {
+                    this.state.isTesting = true;
+                    this.state.timer = setInterval(() => { this.state.timeLeft--; if (this.state.timeLeft <= 0) this.finishTest(); this.updateUI(); }, 1000);
+                }
+                const val = e.target.value;
+                if (val.length <= this.state.selectedPassage.text.length) {
+                    this.state.input = val; this.renderPreview(); this.updateUI();
+                    if (val.length === this.state.selectedPassage.text.length) this.finishTest();
+                }
+            },
+            calculate() {
+                const text = this.state.selectedPassage.text;
+                const typed = this.state.input;
+                const mins = (this.state.duration - this.state.timeLeft) / 60 || 0.01;
+                let mistakes = 0, correct = 0;
+                for (let i = 0; i < typed.length; i++) { if (typed[i] === text[i]) correct++; else mistakes++; }
+                const gwpm = Math.round((typed.length / 5) / mins);
+                const nwpm = Math.max(0, Math.round(((typed.length - (mistakes * 5)) / 5) / mins));
+                const acc = typed.length > 0 ? Math.round((correct / typed.length) * 100) : 100;
+                return { gwpm, nwpm, acc, mistakes, keys: typed.length };
+            },
+            updateUI() {
+                const res = this.calculate();
+                const t = document.getElementById('ui-timer'), n = document.getElementById('ui-net'), g = document.getElementById('ui-gross'), k = document.getElementById('ui-keys');
+                if (t) { const mm = Math.floor(this.state.timeLeft / 60), ss = this.state.timeLeft % 60; t.innerText = `${mm}:${ss < 10 ? '0' : ''}${ss}`; }
+                if (n) n.innerText = res.nwpm; if (g) g.innerText = res.gwpm; if (k) k.innerText = res.keys;
+            },
+            finishTest() { clearInterval(this.state.timer); this.state.isTesting = false; this.state.view = 'results'; this.render(); },
+            renderPreview() {
+                const container = document.getElementById('typing-preview');
+                if (!container) return;
+                const text = this.state.selectedPassage.text;
+                const input = this.state.input;
+                let html = '';
+                for (let i = 0; i < text.length; i++) {
+                    let cls = i < input.length ? (input[i] === text[i] ? 'char-correct' : 'char-incorrect') : (i === input.length ? 'char-current' : 'char-pending');
+                    html += `<span class="${cls}">${text[i]}</span>`;
+                }
+                container.innerHTML = html;
+                const cur = container.querySelector('.char-current');
+                if (cur) cur.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            },
+            render() {
+                const main = document.getElementById('app-view');
+                if (this.state.view === 'home') {
+                    const filtered = PASSAGES.filter(p => p.lang === this.state.lang);
+                    main.innerHTML = `
+                        <div class="max-w-7xl mx-auto px-6 py-20 animate-fade">
+                            <div class="text-center mb-16">
+                                <h1 class="text-5xl md:text-6xl font-black mb-6 tracking-tight text-slate-900">Prepare for <span class="text-blue-600">SSC Success</span></h1>
+                                <p class="text-slate-500 font-medium text-lg">Official 10 & 15 minute typing tests with accurate speed calculation.</p>
+                            </div>
+                            
+                            <div class="flex justify-center mb-16">
+                                <div class="p-1.5 bg-slate-200/50 rounded-2xl flex border border-white backdrop-blur shadow-inner w-full max-w-sm">
+                                    <button onclick="app.state.lang='English'; app.render()" class="flex-1 py-4 rounded-xl font-bold text-sm transition-all ${this.state.lang === 'English' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}">English</button>
+                                    <button onclick="app.state.lang='Hindi'; app.render()" class="flex-1 py-4 rounded-xl font-bold text-sm transition-all ${this.state.lang === 'Hindi' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}">Hindi (Mangal)</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                                ${filtered.map(p => `
+                                    <div class="bg-white p-10 rounded-[2.5rem] card-shadow border border-slate-50 flex flex-col items-start gap-6 group hover:scale-[1.01] transition-transform">
+                                        <div class="flex justify-between w-full items-center">
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full">${p.cat}</span>
+                                            <span class="text-[10px] text-slate-300 font-bold uppercase tracking-widest">${p.lang}</span>
+                                        </div>
+                                        <h3 class="text-2xl font-bold text-slate-800 leading-tight">${p.title}</h3>
+                                        <button onclick="app.openConfig('${p.id}')" class="w-full btn-black font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all text-lg">Start Practice</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else if (this.state.view === 'test') {
+                    const m = Math.floor(this.state.timeLeft / 60), s = this.state.timeLeft % 60;
+                    main.innerHTML = `
+                        <div class="max-w-6xl mx-auto px-6 py-12 animate-fade">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                                <div class="bg-white p-8 rounded-3xl border border-slate-200 text-center shadow-sm">
+                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Timer</p>
+                                    <p id="ui-timer" class="text-4xl font-mono-typing text-blue-600 font-black">${m}:${s < 10 ? '0' : ''}${s}</p>
+                                </div>
+                                <div class="bg-white p-8 rounded-3xl border border-slate-200 text-center shadow-sm">
+                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Net WPM</p>
+                                    <p id="ui-net" class="text-4xl font-mono-typing text-emerald-600 font-black">0</p>
+                                </div>
+                                <div class="bg-white p-8 rounded-3xl border border-slate-200 text-center shadow-sm">
+                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Gross WPM</p>
+                                    <p id="ui-gross" class="text-4xl font-mono-typing text-blue-400 font-black">0</p>
+                                </div>
+                                <div class="bg-white p-8 rounded-3xl border border-slate-200 text-center shadow-sm">
+                                    <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Keys</p>
+                                    <p id="ui-keys" class="text-4xl font-mono-typing text-slate-800 font-black">0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden mb-12">
+                                <div class="px-12 py-5 bg-slate-900 flex justify-between items-center text-white">
+                                    <span class="text-[10px] font-black uppercase tracking-widest">${this.state.selectedPassage.title}</span>
+                                    <span class="text-[10px] font-black opacity-50 uppercase tracking-widest">SSC Practice Mode</span>
+                                </div>
+                                <div id="typing-preview" class="p-12 font-mono-typing text-2xl no-scrollbar"></div>
+                            </div>
+                            <div class="bg-white rounded-[3rem] shadow-2xl border-4 border-blue-50 overflow-hidden">
+                                <textarea id="typing-area" oninput="app.handleInput(event)" class="w-full h-80 p-12 font-mono-typing text-2xl leading-[2.2] resize-none outline-none text-slate-800" placeholder="Start typing the passage above exactly as shown..."></textarea>
+                            </div>
+                            <div class="mt-12 flex justify-between px-8 items-center">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">SSC 5-STREKE PER WORD STANDARD</span>
+                                <button onclick="app.showHome()" class="text-xs font-bold text-red-500 hover:text-red-700 transition">Cancel & Exit</button>
+                            </div>
+                        </div>
+                    `;
+                    this.renderPreview();
+                } else if (this.state.view === 'results') {
+                    const r = this.calculate();
+                    main.innerHTML = `
+                        <div class="max-w-2xl mx-auto px-6 py-20 animate-fade">
+                            <div class="bg-white rounded-[4rem] shadow-2xl overflow-hidden text-center">
+                                <div class="bg-slate-900 p-16 text-white">
+                                    <h2 class="text-5xl font-black mb-4">Test Complete!</h2>
+                                    <p class="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Your Official Scorecard</p>
+                                </div>
+                                <div class="p-16">
+                                    <div class="grid grid-cols-2 gap-8 mb-16">
+                                        <div class="p-10 bg-blue-50 rounded-[2.5rem]">
+                                            <p class="text-[10px] font-black uppercase text-blue-500 mb-2">Net WPM</p>
+                                            <p class="text-7xl font-black text-blue-700">${r.nwpm}</p>
+                                        </div>
+                                        <div class="p-10 bg-emerald-50 rounded-[2.5rem]">
+                                            <p class="text-[10px] font-black uppercase text-emerald-500 mb-2">Accuracy</p>
+                                            <p class="text-7xl font-black text-emerald-700">${r.acc}%</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="app.showHome()" class="w-full btn-black text-white font-black py-7 rounded-3xl shadow-xl text-xl">Back to Dashboard</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    main.innerHTML = `<div class="max-w-4xl mx-auto py-20 px-6 text-center animate-fade"><h1 class="text-4xl font-black mb-8">${this.state.view.toUpperCase()}</h1><p class="text-slate-500">Information about ${this.state.view} will appear here.</p><button onclick="app.showHome()" class="mt-8 text-blue-600 font-bold">Go Back</button></div>`;
+                }
+            }
+        };
+        app.init();
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
